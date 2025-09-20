@@ -57,11 +57,31 @@ app.delete("/user", async (req, res) => {
 });
 
 // Update data of the user
-app.patch("/user", async (req, res) => {
-  const userId = req.body.userId;
-  const data = req.body; //req.body is an obj with all the updated fields that user sent
+app.patch("/user/:userId", async (req, res) => {
+  const userId = req.params?.userId;
+  const data = req.body;
 
   try {
+    const ALLOWED_UPDATES = ["photoUrl", "about", "gender", "age", "skills"];
+
+    // {  sample req.body-> Basically if we send random fields like xyz,Update will not be allowed
+    //   "emailId": "noor12@gmail.com",
+    //   "gender": "male",
+    //   "skills": ["JavaScript","Adaptive","Hardworking"],
+    //   "xyz": "gsdkjflkdf"
+    // }
+    //API-level Data Validation
+    const isUpdateAllowed = Object.keys(data).every(
+      (k) => ALLOWED_UPDATES.includes(k) //It checks if every key in data is present in our ALLOWED_UPDATES,if any key like emailId,xyz is not present in ALLOWED_UPDATES then we throw an error
+    );
+    if (!isUpdateAllowed) {
+      throw new Error("Update not allowed");
+    }
+
+    if (data.skills.length > 10) {
+      throw new Error("Skills cannot be more than 10");
+    }
+
     await User.findByIdAndUpdate(userId, data, {
       returnDocument: "after",
       runValidators: true,
