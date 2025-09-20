@@ -2,17 +2,59 @@ const express = require("express");
 const connectDB = require("./config/database");
 const app = express();
 const User = require("./models/user");
+const { validateSignUpData } = require("./utils/validation");
+const bcrypt = require("bcrypt");
+const validator = require("validator");
 
 app.use(express.json());
 
 app.post("/signup", async (req, res) => {
-  const user = new User(req.body);
-
   try {
+    //Validation of data -> Good practice to create validation fxn in seperate utils folder
+    validateSignUpData(req);
+
+    const { firstName, lastName, emailId, password } = req.body;
+
+    //Encryption of password -> for this we will use a very *famous npm package called *bcrypt*
+    const passwordHash = await bcrypt.hash(password, 10); //it returns a promise hence await
+
+    const user = new User({
+      firstName,
+      lastName,
+      emailId,
+      password: passwordHash,
+    });
+
     await user.save();
     res.send("User added successfully!");
   } catch (err) {
-    res.status(400).send("Error saving the user: " + err.message);
+    res.status(400).send("ERROR: " + err.message);
+  }
+});
+
+//How to match login password with Hashed password in DB
+app.post("/login", async (req, res) => {
+  try {
+    const { emailId, password } = req.body;
+
+    if (!validator.isEmail(emailId)) {
+      throw new Error("Invalid email format!");
+    }
+    //Checking if the emailId even exists in DB or not
+    const user = await User.findOne({ emailId: emailId });
+    if (!user) {
+      throw new Error("Incorrect EmailId");
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password); //1st arg is pass given by user during login,2nd is the hashed pass stored in DB.It returns true/false
+
+    if (isPasswordValid) {
+      res.send("Login Successful!!");
+    } else {
+      throw new Error("Incorrect Password");
+    }
+  } catch (err) {
+    res.status(400).send("ERROR: " + err.message);
   }
 });
 
@@ -78,7 +120,8 @@ app.patch("/user/:userId", async (req, res) => {
       throw new Error("Update not allowed");
     }
 
-    if (data.skills.length > 10) {  //error reading length when no skills given
+    if (data.skills.length > 10) {
+      //error reading length when no skills given
       throw new Error("Skills cannot be more than 10");
     }
 
