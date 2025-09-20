@@ -1,21 +1,14 @@
 const express = require("express");
-const connectDB = require("./config/database"); //Connecting to DB
+const connectDB = require("./config/database");
 const app = express();
 const User = require("./models/user");
 
-//Create POST /signup API to add data to DB
-app.post("/signup", async (req, res) => {
-  // Creating a new instance of the User Model
-  const user = new User({
-    firstName: "Balnoor",
-    lastName: "Singh",
-    emailId: "noorroby22@gmail.com",
-    password: "jattdesi45",
-  });
+app.use(express.json());
 
-  //Always write all DB operations inside try-catch block
+app.post("/signup", async (req, res) => {
+  const user = new User(req.body);
+
   try {
-    //To store this new user in DB. All the mongoose fxns that post data,read data etc returns u a promise so have to write await infront
     await user.save();
     res.send("User added successfully!");
   } catch (err) {
@@ -23,10 +16,65 @@ app.post("/signup", async (req, res) => {
   }
 });
 
+//Get user by email
+app.get("/user", async (req, res) => {
+  const userEmail = req.body.emailId;
+  try {
+    //find all users with this emailId (.find() returns an array of user objects)
+    const users = await User.find({ emailId: userEmail }); //Always write await for DB operations and write inside try-catch block
+    if (users.length === 0) {
+      //empty array i.e no user found
+      res.status(404).send("User not found");
+    } else {
+      res.send(users);
+    }
+  } catch (err) {
+    res.status(400).send("Something went wrong!!");
+  }
+});
+
+//Feed API - GET /feed - get all the users from the database
+app.get("/feed", async (req, res) => {
+  try {
+    const users = await User.find({}); //passing empty obj inside find will return all documents/rows of User
+    res.send(users);
+  } catch (err) {
+    res.status(400).send("Something went wrong!!");
+  }
+});
+
+//Delete a user from DB
+app.delete("/user", async (req, res) => {
+  const userId = req.body.userId;
+  try {
+    //this below fxn is a shorthand for User.findOneAndDelete({ _id:userId }),we can directly write value of _id below
+    const user = await User.findByIdAndDelete(userId);
+
+    res.send("User deleted successfully");
+  } catch (err) {
+    res.status(400).send("Something went wrong");
+  }
+});
+
+// Update data of the user
+app.patch("/user", async (req, res) => {
+  const userId = req.body.userId;
+  const data = req.body; //req.body is an obj with all the updated fields that user sent
+
+  try {
+    await User.findByIdAndUpdate(userId, data, {
+      returnDocument: "after",
+      runValidators: true,
+    }); //1st arg is id of user,2nd is the updated data of user
+    res.send("User details updated succesfully");
+  } catch (err) {
+    res.status(400).send("Update FAILED: " + err.message);
+  }
+});
+
 connectDB()
   .then(() => {
     console.log("Database connection established...");
-    //Server will only listen to incoming reqs if the DB is connected successfully
     app.listen(7777, () => {
       console.log("Server is successfully listening on port 7777....");
     });
