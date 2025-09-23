@@ -71,6 +71,28 @@ const userSchema = new mongoose.Schema(
   }
 );
 
+//**dont write arrow fxn as 'this' keyword only works with older fxn
+userSchema.methods.getJWT = async function () {
+  const user = this; //every user document like Balnoor,Elon are instances of this User model.So when we refer to 'this' here,it will represent that particular instance.Eg->in "/login" after getting user=User.findOne(emailId),we will do user.getJWT(),so 'this' will refer to loggedIn user
+
+  const token = await jwt.sign({ _id: user._id }, "DEV@Tinder$798", {
+    expiresIn: "7d",
+  });
+
+  return token;
+};
+
+userSchema.methods.validatePassword = async function (passwordInputByUser) {
+  const user = this;
+  const passwordHash = user.password; //this.password,also its the official password hash stored in DB
+
+  const isPasswordValid = await bcrypt.compare(
+    passwordInputByUser,
+    passwordHash
+  );
+  return isPasswordValid;
+};
+
 //** So first of all u create a schema and then u create a model out of it and then with this model we will create
 // new-new instances of this model whenever we need to post user Data in DB*/
 //Now creating user model
