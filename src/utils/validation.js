@@ -11,4 +11,23 @@ const validateSignUpData = (req) => {
   }
 };
 
-module.exports = { validateSignUpData };
+const validateEditProfileData = (req) => {
+  const allowedEditFields = [
+    "firstName",
+    "lastName",
+    "age",
+    "gender",
+    "photoUrl",
+    "skills",
+    "about",
+  ];
+
+  //we will loop through each field (like age,about,skills etc) of req.body using every and check if our allowedEditFields include that field and return T/F
+  const isEditAllowed = Object.keys(req.body).every((field) =>
+    allowedEditFields.includes(field)
+  );
+
+  return isEditAllowed; //return T or F
+};
+
+module.exports = { validateSignUpData, validateEditProfileData };
