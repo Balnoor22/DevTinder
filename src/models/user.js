@@ -43,13 +43,17 @@ const userSchema = new mongoose.Schema(
     },
     gender: {
       type: String,
+      enum: {
+        values: ["male", "female", "others"],
+        message: `{VALUE} is not a valid gender type`,
+      },
       //custom validation fxn,it will only run for new user(post) entries,and will not work if updating info(patch,put),
       //To fix that,we will add 3rd arg.(which is obj) inside our findByKeyAndUpdate() called runValidators: true
-      validate(value) {
-        if (!["male", "female", "others"].includes(value)) {
-          throw new Error("Invalid Gender!");
-        }
-      },
+      // validate(value) {
+      //   if (!["male", "female", "others"].includes(value)) {
+      //     throw new Error("Invalid Gender!");
+      //   }
+      // },
     },
     photoUrl: {
       type: String,
