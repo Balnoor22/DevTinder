@@ -54,9 +54,51 @@ requestRouter.post(
       const data = await connectionRequest.save(); //save in DB
 
       res.json({
-        message: req.user.firstName+" "+status+" "+toUser.firstName,
+        message: req.user.firstName + " " + status + " " + toUser.firstName,
         data, //also sent data containing info as response
       });
+    } catch (err) {
+      res.status(400).send("ERROR: " + err.message);
+    }
+  }
+);
+
+requestRouter.post(
+  "/request/review/:status/:requestId",
+  userAuth,
+  async (req, res) => {
+    try {
+      const loggedInUser = req.user;
+      const { status, requestId } = req.params;
+      //Handling Corner Cases ->
+
+      //Validate the status
+      const allowedStatus = ["accepted", "rejected"];
+
+      if (!allowedStatus.includes(status)) {
+        return res.status(400).json({ message: "Status not allowed!" });
+      }
+
+      //request Id should be valid(present in DB)
+      //Balnoor => Elon
+      //loggedInId == toUserId
+      //status = interested
+      const connectionRequest = await ConnectionRequest.findOne({
+        _id: requestId, //reqId is _id of ConnectionRequest DB entry
+        toUserId: loggedInUser._id, //Elons id
+        status: "interested",
+      });
+      if (!connectionRequest) {
+        return res
+          .status(404)
+          .json({ message: "No Connection request was found" });
+      }
+      //if con. req. is found
+      connectionRequest.status = status; //this status if from req.params and we are chaning status from interested to acccepted/rejected
+
+      const data = await connectionRequest.save();
+
+      res.json({ message: "Connection Request " + status, data });
     } catch (err) {
       res.status(400).send("ERROR: " + err.message);
     }

@@ -4,10 +4,12 @@ const connectionRequestSchema = new mongoose.Schema(
   {
     fromUserId: {
       type: mongoose.Schema.Types.ObjectId,
+      ref: "User", // reference to the user collection
       required: true,
     },
     toUserId: {
       type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
       required: true,
     },
     status: {
@@ -15,7 +17,7 @@ const connectionRequestSchema = new mongoose.Schema(
       required: true,
       enum: {
         //we use enum whenever we want to restrict user to certain values,if u write any other value an error is thrown
-        values: ["ignored", "interested", "aceepted", "rejected"],
+        values: ["ignored", "interested", "accepted", "rejected"],
         message: `{VALUE} is incorrect status type`,
       },
     },

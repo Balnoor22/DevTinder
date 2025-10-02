@@ -11,11 +11,13 @@ app.use(cookieParser()); //to read cookies from user req
 const authRouter = require("./routes/auth");
 const profileRouter = require("./routes/profile");
 const requestRouter = require("./routes/request");
+const userRouter = require("./routes/user");
 
 //Now to use them,just write them like a Middleware
 app.use("/", authRouter); //basically whenever a req is coming at "/" go to authRouter and check all the routes inside it if any is matching the req
 app.use("/", profileRouter);
 app.use("/", requestRouter);
+app.use("/", userRouter);
 
 connectDB()
   .then(() => {
