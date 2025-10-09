@@ -58,7 +58,7 @@ const userSchema = new mongoose.Schema(
     photoUrl: {
       type: String,
       default:
-        "https://www.pngitem.com/pimgs/m/581-5813504_avatar-dummy-png-transparent-png.png",
+        "https://cdn.pixabay.com/photo/2023/02/18/11/00/icon-7797704_640.png",
       validate(value) {
         if (!validator.isURL(value)) {
           throw new Error("Invalid Photo URL: " + value);
@@ -67,7 +67,7 @@ const userSchema = new mongoose.Schema(
     },
     about: {
       type: String,
-      default: "Write your bio here", //if user doesnt fill 'about',it will get this default value
+      default: "About", //if user doesnt fill 'about',it will get this default value
     },
     skills: {
       type: [String], //takes in array of strings

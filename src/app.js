@@ -3,7 +3,14 @@ const connectDB = require("./config/database");
 const app = express();
 const validator = require("validator");
 const cookieParser = require("cookie-parser");
+const cors = require("cors");
 
+app.use(
+  cors({
+    origin: "http://localhost:5173", //where ur frontend is hosted
+    credentials: true, //Whitelisting frontend domain(to get cookies)
+  })
+);
 app.use(express.json());
 app.use(cookieParser()); //to read cookies from user req
 

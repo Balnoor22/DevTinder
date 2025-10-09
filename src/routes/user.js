@@ -67,7 +67,7 @@ userRouter.get("/feed", userAuth, async (req, res) => {
 
     const page = parseInt(req.query.page) || 1; //As route will be like /feed?page=1&limit=10,1 and 10 will be in string form and we want 1,10 as int.And if we dont get anything from query as its optional,assume page no is 1
     let limit = parseInt(req.query.limit) || 10;
-    limit = limit > 50 ? 50 : limit;  //we dont want to show more than 50 users at a time
+    limit = limit > 50 ? 50 : limit; //we dont want to show more than 50 users at a time
 
     const skip = (page - 1) * limit;
 
@@ -97,7 +97,7 @@ userRouter.get("/feed", userAuth, async (req, res) => {
       .skip(skip)
       .limit(limit); //now we want our API to return only 10 users at a time in feed(called Pagination)
 
-    res.json({data: users});
+    res.json({ data: users });
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
