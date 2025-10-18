@@ -5,6 +5,7 @@ const User = require("../models/user");
 const bcrypt = require("bcrypt");
 const validator = require("validator");
 
+
 authRouter.post("/signup", async (req, res) => {
   try {
     //Validation of data -> Good practice to create validation fxn in seperate utils folder
@@ -56,6 +57,8 @@ authRouter.post("/login", async (req, res) => {
     if (isPasswordValid) {
       //Create a JWT token
       const token = await user.getJWT();
+
+
 
       //Add the token to cookies and send the response back to the user
       res.cookie("token", token, {
